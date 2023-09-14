@@ -1,8 +1,18 @@
 from torch.utils.cpp_extension import load
 import torch
 from pkg_resources import parse_version
+import os
 
-gridsample_grad2 = load(name='gridsample_grad2', sources=['gridsample_cuda.cpp', 'gridsample_cuda.cu'], verbose=True)
+gridsample_grad2 = load(name='gridsample_grad2', sources=[os.path.join(os.path.dirname(__file__), 'gridsample_cuda.cpp'), os.path.join(os.path.dirname(__file__), 'gridsample_cuda.cu')], verbose=True)
+
+def grid_sample(input, grid, mode, padding_mode='zeros', align_corners=True):
+    assert mode == 'bilinear'
+    if input.dim() == 4:
+        return grid_sample_2d(input, grid, padding_mode, align_corners)
+    elif input.dim() == 5:
+        return grid_sample_3d(input, grid, padding_mode, align_corners)
+    else:
+        raise NotImplementedError()
 
 def grid_sample_2d(input, grid, padding_mode='zeros', align_corners=True):
     assert padding_mode in ['zeros', 'border']
